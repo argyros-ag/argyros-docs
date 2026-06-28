@@ -1,0 +1,226 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "palm",
+  "name": "Argyros",
+  "metadata": {
+    "timestamp": true
+  },
+  "banner": {
+    "content": "Argyros is in active development and not yet live in production. APIs and documentation may change.",
+    "dismissible": true
+  },
+  "seo": {
+    "indexing": "navigable",
+    "metatags": {
+      "og:type": "website",
+      "og:site_name": "Argyros",
+      "og:locale": "en_US",
+      "og:image": "/images/og-card.png",
+      "twitter:card": "summary_large_image",
+      "twitter:image": "/images/og-card.png"
+    }
+  },
+  "contextual": {
+    "options": ["copy", "view", "chatgpt", "claude", "cursor"]
+  },
+  "colors": {
+    "primary": "#c9ced6",
+    "light": "#e8eaef",
+    "dark": "#9ca3af"
+  },
+  "appearance": {
+    "default": "dark",
+    "strict": true
+  },
+  "background": {
+    "color": {
+      "dark": "#08080a",
+      "light": "#ffffff"
+    },
+    "decoration": "grid"
+  },
+  "fonts": {
+    "heading": {
+      "family": "Bricolage Grotesque",
+      "weight": 700
+    },
+    "body": {
+      "family": "Inter",
+      "weight": 400
+    }
+  },
+  "styling": {
+    "codeblocks": {
+      "theme": "github-dark"
+    }
+  },
+  "favicon": "/favicon.png",
+  "openapi": ["/api-reference/openapi.json"],
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Get Started",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "get-started/introduction",
+              "get-started/authentication",
+              "get-started/architecture",
+              "get-started/faq"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Docs",
+        "groups": [
+          {
+            "group": "Swap",
+            "pages": [
+              "docs/swap/overview",
+              "docs/swap/get-quote",
+              "docs/swap/build-transaction",
+              "docs/swap/get-instructions",
+              "docs/swap/send-transaction"
+            ]
+          },
+          {
+            "group": "Concepts",
+            "pages": [
+              "concepts/chains",
+              "concepts/routing",
+              "concepts/fees",
+              "concepts/security"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "SDK",
+        "groups": [
+          {
+            "group": "SDK",
+            "pages": [
+              "sdk/quickstart",
+              "sdk/configuration",
+              "sdk/quote",
+              "sdk/swap",
+              "sdk/instructions",
+              "sdk/error-handling",
+              "sdk/types",
+              "sdk/examples"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Widget",
+        "groups": [
+          {
+            "group": "Widget",
+            "pages": [
+              "widget/quickstart",
+              "widget/attributes",
+              "widget/events",
+              "widget/theming",
+              "widget/wallet-integration",
+              "widget/examples"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api-reference/introduction",
+              "api-reference/rate-limits",
+              "api-reference/errors"
+            ]
+          },
+          {
+            "group": "Endpoints",
+            "pages": [
+              "api-reference/quote/index",
+              "api-reference/swap/index",
+              "api-reference/instructions/index",
+              "api-reference/health/index"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/executing-swaps",
+              "guides/handling-errors",
+              "guides/embedding-swap"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "AI",
+        "groups": [
+          {
+            "group": "AI",
+            "pages": [
+              "ai/overview"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Updates",
+        "groups": [
+          {
+            "group": "Updates",
+            "pages": [
+              "updates/index"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Support",
+          "href": "https://t.me/argyros",
+          "icon": "telegram"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/logo/argyros-silver.png",
+    "dark": "/logo/argyros-silver.png"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Website",
+        "href": "https://argyros.xyz"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Get API key",
+      "href": "https://discord.gg/z98Zmk6chP"
+    }
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/argyros_ag",
+      "github": "https://github.com/argyros-ag",
+      "discord": "https://discord.gg/z98Zmk6chP",
+      "telegram": "https://t.me/argyros"
+    }
+  }
+}

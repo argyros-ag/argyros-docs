@@ -1,0 +1,118 @@
+---
+title: "Authentication — API keys & the Authorization header"
+sidebarTitle: "Authentication"
+description: "Authenticate Argyros API requests with an API key using the Authorization: Bearer header. How to get a key, use it from the SDK, widget, and WebSocket, and keep it secure."
+llmDescription: "How to authenticate with the Argyros API. Every request to https://api.argyros.xyz is authenticated with an API key (format argy_...) sent in the Authorization: Bearer header. Covers getting a key (free during beta via Discord), authenticating with cURL/TypeScript/Python, passing the key in the SDK (apiKey) and widget (api-key attribute), the WebSocket query-param form (/api/v1/stream?key=argy_...), 401/403 errors for missing or invalid keys, key security best practices, and a link to rate limits. Fogo; Solana coming soon."
+icon: "key"
+---
+
+Every request to the Argyros API (`https://api.argyros.xyz`) is authenticated with an API key.
+Keys look like `argy_` followed by a long hex string, and you send them in the standard
+`Authorization: Bearer` header.
+
+<Note>
+Argyros is **free during beta** — there are no paid tiers yet. You still need a key so we can
+apply [rate limits](/api-reference/rate-limits) and keep the service healthy.
+</Note>
+
+## Get an API key
+
+<Steps>
+  <Step title="Request a key">
+    During beta, keys are issued in our community Discord. Join and ask in the
+    developer channel — keys are granted at no cost.
+
+    <Card title="Get an API key on Discord" icon="discord" href="https://discord.gg/z98Zmk6chP" horizontal>
+      Join the Argyros Discord and request a key.
+    </Card>
+  </Step>
+  <Step title="Store it as an environment variable">
+    Never hard-code a key in source. Keep it in an environment variable:
+
+    ```bash
+    export ARGYROS_KEY="argy_your_key_here"
+    ```
+  </Step>
+</Steps>
+
+## Authenticate a request
+
+Send your key in the `Authorization` header on every request:
+
+<CodeGroup>
+```bash cURL
+curl "https://api.argyros.xyz/api/v1/quote?inputMint=So11111111111111111111111111111111111111112&outputMint=uSd2czE61Evaf76RNbq4KPpXnkiL3irdzgLFUMe3NoG&amount=1000000000&swapMode=ExactIn" \
+  -H "Authorization: Bearer $ARGYROS_KEY"
+```
+
+```typescript TypeScript
+const res = await fetch(
+  "https://api.argyros.xyz/api/v1/quote?inputMint=So11...&outputMint=uSd2...&amount=1000000000&swapMode=ExactIn",
+  { headers: { Authorization: `Bearer ${process.env.ARGYROS_KEY}` } },
+);
+```
+
+```python Python
+import os, requests
+
+res = requests.get(
+    "https://api.argyros.xyz/api/v1/quote",
+    params={
+        "inputMint": "So11111111111111111111111111111111111111112",
+        "outputMint": "uSd2czE61Evaf76RNbq4KPpXnkiL3irdzgLFUMe3NoG",
+        "amount": "1000000000",
+        "swapMode": "ExactIn",
+    },
+    headers={"Authorization": f"Bearer {os.environ['ARGYROS_KEY']}"},
+)
+```
+</CodeGroup>
+
+## SDK and widget
+
+The [SDK](/sdk/configuration) and [widget](/widget/attributes) take the key directly — you don't
+set headers yourself.
+
+<CodeGroup>
+```typescript SDK
+import { ArgyrosSDK } from "@argyros/sdk";
+
+const sdk = new ArgyrosSDK({ apiKey: process.env.ARGYROS_KEY });
+```
+
+```html Widget
+<argyros-swap api-key="argy_your_key_here" chain="fogo" theme="dark"></argyros-swap>
+```
+</CodeGroup>
+
+## WebSocket streaming
+
+Browsers can't set custom headers on a WebSocket connection, so the streaming endpoint accepts the
+key as a `key` query parameter instead:
+
+```text
+wss://api.argyros.xyz/api/v1/stream?key=argy_your_key_here
+```
+
+## Keep your key secret
+
+<Warning>
+A key grants access under your account's rate limits. Treat it like a password.
+</Warning>
+
+- **Server-side keys stay on the server.** Don't commit keys to git or ship them in a public repo.
+- **Browser and widget usage exposes the key** in client code. For client-side embeds, use a key
+  you've provisioned for that purpose and rotate it if it leaks.
+- **Rotate compromised keys** by requesting a new one and retiring the old.
+
+## Errors
+
+A missing or invalid key returns an authentication error:
+
+| Status | Meaning |
+|--------|---------|
+| `401 Unauthorized` | No API key was provided. |
+| `403 Forbidden` | The key is invalid, disabled, or revoked. |
+
+The SDK surfaces these as `AuthError` — see [SDK error handling](/sdk/error-handling). For
+throughput limits and the `429` response, see [Rate limits](/api-reference/rate-limits).

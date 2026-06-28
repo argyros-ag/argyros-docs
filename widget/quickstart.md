@@ -1,0 +1,148 @@
+---
+title: "Widget quickstart"
+description: "Add the argyros-swap Web Component swap UI to any app — HTML/CDN, React, Vue, or Next.js — in two minutes."
+llmDescription: "Quickstart for the @argyros/widget argyros-swap Web Component. Shows installation via npm and CDN UMD, and embedding in plain HTML, React, Vue, and Next.js. Framework-agnostic swap UI for Fogo; Solana coming soon."
+---
+
+Add a swap UI to your app in 2 minutes. The `<argyros-swap>` Web Component works in any framework or plain HTML.
+
+---
+
+## Install
+
+```bash
+npm install @argyros/widget
+```
+
+Or via CDN (no build step):
+
+```html
+<script src="https://cdn.argyros.trade/argyros-widget.umd.js"></script>
+```
+
+---
+
+## HTML / CDN
+
+```html
+<script src="https://cdn.argyros.trade/argyros-widget.umd.js"></script>
+
+<argyros-swap
+  api-key="argy_your_api_key"
+  chain="solana"
+  default-input-mint="So11111111111111111111111111111111111111112"
+  default-output-mint="uSd2czE61Evaf76RNbq4KPpXnkiL3irdzgLFUMe3NoG"
+  theme="dark"
+></argyros-swap>
+```
+
+That's it. The widget handles token selection, quoting, and swap execution.
+
+---
+
+## React
+
+```tsx
+import "@argyros/widget";
+
+function App() {
+  return (
+    <argyros-swap
+      api-key="argy_your_api_key"
+      chain="solana"
+      default-input-mint="So11111111111111111111111111111111111111112"
+      default-output-mint="uSd2czE61Evaf76RNbq4KPpXnkiL3irdzgLFUMe3NoG"
+      theme="dark"
+    />
+  );
+}
+```
+
+For TypeScript, add to your `global.d.ts`:
+
+```typescript
+declare namespace JSX {
+  interface IntrinsicElements {
+    "argyros-swap": React.DetailedHTMLProps<
+      React.HTMLAttributes<HTMLElement> & {
+        "api-key"?: string;
+        chain?: string;
+        "base-url"?: string;
+        "rpc-url"?: string;
+        "default-input-mint"?: string;
+        "default-output-mint"?: string;
+        theme?: "dark" | "light";
+      },
+      HTMLElement
+    >;
+  }
+}
+```
+
+---
+
+## Vue
+
+```vue
+<template>
+  <argyros-swap
+    api-key="argy_your_api_key"
+    chain="solana"
+    default-input-mint="So11111111111111111111111111111111111111112"
+    default-output-mint="uSd2czE61Evaf76RNbq4KPpXnkiL3irdzgLFUMe3NoG"
+    theme="dark"
+    @quote-update="onQuote"
+    @swap-complete="onSwap"
+  />
+</template>
+
+<script setup>
+import "@argyros/widget";
+
+function onQuote(e) {
+  console.log("Quote:", e.detail);
+}
+function onSwap(e) {
+  console.log("Swap:", e.detail);
+}
+</script>
+```
+
+---
+
+## Next.js
+
+Web Components require client-side rendering. Use dynamic import:
+
+```tsx
+"use client";
+
+import { useEffect, useRef } from "react";
+
+export default function SwapWidget() {
+  const ref = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    import("@argyros/widget");
+  }, []);
+
+  return (
+    <argyros-swap
+      ref={ref}
+      api-key="argy_your_api_key"
+      chain="solana"
+      theme="dark"
+    />
+  );
+}
+```
+
+---
+
+## Next Steps
+
+- [Attributes](./attributes.md) -- all configurable HTML attributes
+- [Events](./events.md) -- listen for quotes, swaps, and errors
+- [Wallet Integration](./wallet-integration.md) -- connect your wallet adapter
+- [Theming](./theming.md) -- customize colors, radius, fonts
+- [Examples](./examples.md) -- full integration examples per framework
