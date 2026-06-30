@@ -82,6 +82,7 @@
               "docs/swap/get-quote",
               "docs/swap/build-transaction",
               "docs/swap/get-instructions",
+              "docs/swap/stream-quotes",
               "docs/swap/send-transaction"
             ]
           },
@@ -147,6 +148,8 @@
               "api-reference/quote/index",
               "api-reference/swap/index",
               "api-reference/instructions/index",
+              "api-reference/stream/index",
+              "api-reference/price/index",
               "api-reference/health/index"
             ]
           }

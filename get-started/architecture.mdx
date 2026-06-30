@@ -52,4 +52,6 @@ Client                    Argyros API                 Fogo
 | **Transaction** | `POST /api/v1/swap` | Get a ready-to-sign transaction. Sign it and submit. Simplest integration. |
 | **Instructions** | `POST /api/v1/instructions` | Get raw instructions to compose with your own transaction logic (e.g., adding custom instructions before/after the swap). |
 
-Both paths start with `GET /api/v1/quote` to find the best route.
+Both paths start with `GET /api/v1/quote` to find the best route. For prices that update in real
+time, the API also exposes a WebSocket [quote stream](/docs/swap/stream-quotes) that pushes a new
+quote whenever a pair's price changes.

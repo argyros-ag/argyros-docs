@@ -1,0 +1,161 @@
+---
+title: "Stream Quotes"
+description: "WS /api/v1/stream — Subscribe to live swap quotes over WebSocket and receive a push whenever the price changes."
+llmDescription: "Protocol reference for the Argyros WebSocket quote stream at wss://api.argyros.xyz/api/v1/stream on Fogo. Raw JSON-over-WebSocket (not socket.io). Clients send subscribe/unsubscribe ops with a pairs array ({in, out, amount, exactIn}); the server replies with an immediate first quote, an ack ({type:subscribed|unsubscribed|error, count}), and thereafter pushes a quote message ({type:quote, in, out, amount, amountOut, priceImpactBps, hops, slot}) only when the quote materially changes. Limits: 256 subscriptions per connection, change-only pushes, ~50ms debounce. Solana coming soon."
+---
+
+# Stream Quotes
+
+`WS /api/v1/stream` is a WebSocket endpoint that pushes **live swap quotes**. Subscribe to one or
+more token pairs and the server sends an updated quote whenever the on-chain price for that pair
+materially changes — no polling required.
+
+```
+wss://api.argyros.xyz/api/v1/stream
+```
+
+The transport is **raw JSON over WebSocket** (plain text frames — not socket.io or STOMP). Open a
+standard WebSocket connection, then exchange the JSON messages described below.
+
+<Info>
+Use streaming when you need a continuously up-to-date price (e.g. a swap UI showing a live rate).
+For one-off quotes, [`GET /api/v1/quote`](/api-reference/quote/index) is simpler.
+</Info>
+
+## Connecting
+
+Open a WebSocket to the endpoint. When connecting **through the gateway**, the same API-key auth and
+per-plan rate limits as the REST endpoints apply to the upgrade request (see
+[Authentication](/get-started/authentication) and [Rate Limits](/api-reference/rate-limits)). Once
+upgraded, the connection is long-lived and is not subject to the per-request rate limiter.
+
+## Client messages
+
+Send a JSON text frame with an `op` and a `pairs` array.
+
+<ParamField body="op" type="string" required>
+  Operation to perform: `subscribe` or `unsubscribe`.
+</ParamField>
+
+<ParamField body="pairs" type="object[]" required>
+  One or more pair specifications to subscribe or unsubscribe.
+  <Expandable title="pair fields">
+    <ParamField body="in" type="string" required>
+      Input token mint address (Solana base58 public key).
+    </ParamField>
+    <ParamField body="out" type="string" required>
+      Output token mint address (Solana base58 public key).
+    </ParamField>
+    <ParamField body="amount" type="string" required>
+      Amount in smallest token units, as a string. For SOL (9 decimals): `1000000000` = 1 SOL.
+    </ParamField>
+    <ParamField body="exactIn" type="boolean" required>
+      `true` to quote `amount` as the exact input (ExactIn). `false` to treat it as the exact
+      desired output (ExactOut).
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+A subscription is keyed by the full `(in, out, amount, exactIn)` tuple — two subscriptions that
+differ only in `amount` are distinct streams.
+
+### Subscribe
+
+```json
+{
+  "op": "subscribe",
+  "pairs": [
+    {
+      "in": "So11111111111111111111111111111111111111112",
+      "out": "uSd2czE61Evaf76RNbq4KPpXnkiL3irdzgLFUMe3NoG",
+      "amount": "50000000",
+      "exactIn": true
+    }
+  ]
+}
+```
+
+On subscribe, the server sends an **immediate first quote** for each newly accepted pair (so you
+don't wait for the next price change), followed by a `subscribed` ack. The first quote may arrive
+just before the ack.
+
+### Unsubscribe
+
+```json
+{
+  "op": "unsubscribe",
+  "pairs": [
+    {
+      "in": "So11111111111111111111111111111111111111112",
+      "out": "uSd2czE61Evaf76RNbq4KPpXnkiL3irdzgLFUMe3NoG",
+      "amount": "50000000",
+      "exactIn": true
+    }
+  ]
+}
+```
+
+## Server messages
+
+### Quote push
+
+Sent for the immediate first quote and again **only when the quote materially changes** (a change in
+`amountOut`, `priceImpactBps`, or `hops`). Identical re-quotes are suppressed.
+
+<ResponseField name="type" type="string">Always `"quote"`.</ResponseField>
+<ResponseField name="in" type="string">Input token mint.</ResponseField>
+<ResponseField name="out" type="string">Output token mint.</ResponseField>
+<ResponseField name="amount" type="string">The subscribed amount, in smallest units.</ResponseField>
+<ResponseField name="amountOut" type="string">Estimated output amount in smallest units (ExactIn) — the live quote.</ResponseField>
+<ResponseField name="priceImpactBps" type="integer">Price impact in basis points.</ResponseField>
+<ResponseField name="hops" type="integer">Number of hops in the route. 1 = direct, 2+ = multi-hop.</ResponseField>
+<ResponseField name="slot" type="integer">The Fogo slot the quote was computed at.</ResponseField>
+
+### Acknowledgement
+
+Sent in response to a `subscribe` / `unsubscribe`, or to report a problem with a message.
+
+<ResponseField name="type" type="string">`"subscribed"`, `"unsubscribed"`, or `"error"`.</ResponseField>
+<ResponseField name="message" type="string">Present on errors — e.g. `"invalid json"`, `"unknown op"`.</ResponseField>
+<ResponseField name="count" type="integer">Number of pairs accepted by a subscribe/unsubscribe. Invalid or duplicate pairs are skipped and not counted.</ResponseField>
+
+## Examples
+
+<ResponseExample>
+```json quote push
+{
+  "type": "quote",
+  "in": "So11111111111111111111111111111111111111112",
+  "out": "uSd2czE61Evaf76RNbq4KPpXnkiL3irdzgLFUMe3NoG",
+  "amount": "50000000",
+  "amountOut": "452",
+  "priceImpactBps": 0,
+  "hops": 1,
+  "slot": 587964937
+}
+```
+
+```json subscribed ack
+{ "type": "subscribed", "count": 1 }
+```
+
+```json error
+{ "type": "error", "message": "unknown op" }
+```
+</ResponseExample>
+
+## Limits & behavior
+
+| Behavior | Value |
+|----------|-------|
+| Max subscriptions per connection | 256 |
+| Push policy | Only when the quote materially changes (`amountOut` / `priceImpactBps` / `hops`) |
+| Update coalescing | Bursts of pool changes are debounced into a single recompute (~50 ms) |
+| First quote | Sent immediately on subscribe |
+| Backpressure | A connection whose outbound queue overflows (slow reader) is dropped — reconnect and resubscribe |
+
+<Warning>
+If your client can't keep up with the push rate, the server drops the connection rather than
+buffering unboundedly. Read frames promptly, and on an unexpected close, reconnect and re-send your
+subscriptions.
+</Warning>
