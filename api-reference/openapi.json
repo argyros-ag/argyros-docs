@@ -193,6 +193,94 @@
         }
       }
     },
+    "/api/v1/price/{mint}": {
+      "get": {
+        "operationId": "getPrice",
+        "summary": "Get token price",
+        "description": "Returns the current spot USD price for a token derived from live on-chain pool state. Stablecoins are anchored at $1; FOGO is priced from the deepest native↔stablecoin pool; all other tokens from their deepest anchor-paired pool. Returns `price: 0` when no price is known (no anchor-paired pool observed, or decimals pending).",
+        "tags": ["Price"],
+        "parameters": [
+          {
+            "name": "mint",
+            "in": "path",
+            "required": true,
+            "description": "Token mint address (Solana base58 public key).",
+            "schema": {
+              "type": "string",
+              "example": "So11111111111111111111111111111111111111112"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Price retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": { "$ref": "#/components/schemas/PriceResult" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/price": {
+      "get": {
+        "operationId": "getBatchPrices",
+        "summary": "Batch token prices",
+        "description": "Fetch up to 100 spot USD prices in one call. Pass a comma-separated list of mint addresses as the `mints` query parameter. Unknown tokens return `price: 0`.",
+        "tags": ["Price"],
+        "parameters": [
+          {
+            "name": "mints",
+            "in": "query",
+            "required": true,
+            "description": "Comma-separated token mint addresses (base58), max 100.",
+            "schema": {
+              "type": "string",
+              "example": "So11111111111111111111111111111111111111112,uSd2czE61Evaf76RNbq4KPpXnkiL3irdzgLFUMe3NoG"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Prices retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "prices": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/PriceResult" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request — missing or malformed `mints` parameter.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/instructions": {
       "post": {
         "operationId": "buildInstructions",
@@ -252,6 +340,33 @@
   },
   "components": {
     "schemas": {
+      "PriceResult": {
+        "type": "object",
+        "description": "Spot USD price for a single token.",
+        "properties": {
+          "mint": {
+            "type": "string",
+            "description": "Token mint address.",
+            "example": "So11111111111111111111111111111111111111112"
+          },
+          "price": {
+            "type": "number",
+            "description": "Spot USD price. `0` when no price is known (no anchor-paired pool or decimals pending).",
+            "example": 0.00909763
+          },
+          "slot": {
+            "type": "integer",
+            "description": "Fogo slot the price was derived at. `0` for stablecoin constants or unknown tokens.",
+            "example": 588079915
+          },
+          "updatedAt": {
+            "type": "integer",
+            "description": "Unix seconds when the price was last updated. `0` for constants/unknowns — use to detect staleness.",
+            "example": 1782798694
+          }
+        },
+        "required": ["mint", "price", "slot", "updatedAt"]
+      },
       "ErrorResponse": {
         "type": "object",
         "properties": {

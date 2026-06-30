@@ -56,6 +56,9 @@
   },
   "favicon": "/favicon.png",
   "openapi": ["/api-reference/openapi.json"],
+  "api": {
+    "asyncapi": "/api-reference/asyncapi.json"
+  },
   "navigation": {
     "tabs": [
       {
@@ -67,6 +70,7 @@
               "get-started/introduction",
               "get-started/authentication",
               "get-started/architecture",
+              "get-started/self-hosted",
               "get-started/faq"
             ]
           }
@@ -163,7 +167,8 @@
             "pages": [
               "guides/executing-swaps",
               "guides/handling-errors",
-              "guides/embedding-swap"
+              "guides/embedding-swap",
+              "guides/self-hosting"
             ]
           }
         ]
