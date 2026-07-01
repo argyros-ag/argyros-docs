@@ -5,6 +5,8 @@ description: "How Argyros finds the best swap path across DEXs on Fogo."
 llmDescription: "How Argyros routing works at a high level on Fogo. Covers direct swaps, multi-hop routing through intermediate tokens (up to 5 hops), supported liquidity sources (Vortex, Fluxbeam, Fogo.fun, Moonit bonding curves), price impact severity levels, and slippage protection mechanics. Solana support coming soon with up to 7 hops via P-Token."
 ---
 
+import SolanaComingSoon from "/snippets/solana-coming-soon.mdx";
+
 # Routing
 
 Argyros evaluates multiple paths to find the best execution for every swap.
@@ -29,9 +31,7 @@ Each hop uses the best available pool. The routing engine evaluates all viable p
 
 The routing engine supports up to **5 hops** on Fogo.
 
-<Info>
-**Solana coming soon.** With P-Token optimization, Solana will support up to 7 hops, enabling deeper route search for exotic token pairs. See [Supported Chains](/concepts/chains).
-</Info>
+<SolanaComingSoon />
 
 ## Supported liquidity sources
 
